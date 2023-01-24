@@ -50,6 +50,7 @@ function Username() {
               <span className="text-gray-500">
                 Not a member
                 <Link className="text-red-500" to="/register">
+                  {' '}
                   Register Now
                 </Link>
               </span>
