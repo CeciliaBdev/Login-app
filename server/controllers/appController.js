@@ -4,7 +4,22 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const ENV = require('../config.js')
 // dans le gitignore
+const otpGenerator = require('otp-generator')
 
+/** middleware for verify user */
+module.exports.verifyUser = verifyUser
+async function verifyUser(req, res, next) {
+  try {
+    const { username } = req.method == 'GET' ? req.query : req.body
+
+    // check the user existance
+    let exist = await UserModel.findOne({ username })
+    if (!exist) return res.status(404).send({ error: "Can't find User!" })
+    next()
+  } catch (error) {
+    return res.status(404).send({ error: 'Authentication Error' })
+  }
+}
 /** POST */
 /**
  * http://localhost:8080/api/register
@@ -132,23 +147,68 @@ exports.login = (req, res) => {
  * http://localhost:8080/api/user/example123
  */
 exports.getUser = (req, res) => {
-  res.json('getUser route')
+  const { username } = req.params
+
+  try {
+    if (!username) return res.status.send({ error: 'invalid username' })
+    UserModel.findOne({ username }, function (err, user) {
+      if (err) return res.status(500).send({ err })
+      if (!user)
+        return res.status(501).send({ error: "Couldn't Find the User" })
+
+      /** remove password from user */
+      // mongoose return unnecessary data with object so convert it into json
+      //retourne un nouvel objet sans le password
+      const { password, ...rest } = Object.assign({}, user.toJSON())
+
+      return res.status(201).send(rest)
+    })
+  } catch (error) {
+    return res.status(404).send({ error: 'Cant find user data' })
+  }
+}
+/** GET */
+/**
+ * http://localhost:8080/api/user
+ */
+exports.getAllUsers = (req, res) => {
+  UserModel.find()
+    .then((users) => {
+      res.status(200).json({ users })
+    })
+    .catch((error) => {
+      res.status(400).json({ error })
+    })
 }
 
 /** GET */
 /**
  * http://localhost:8080/api/generateOTP
  */
-exports.generateOTP = (req, res) => {
-  res.json('generateOTP route')
+
+module.exports.generateOTP = generateOTP
+async function generateOTP(req, res) {
+  req.app.locals.OTP = await otpGenerator.generate(6, {
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  })
+  res.status(201).send({ code: req.app.locals.OTP })
 }
 
 /** GET */
 /**
  * http://localhost:8080/api/verifyOTP
  */
+//unique OTP - utilisable une fois
 exports.verifyOTP = (req, res) => {
-  res.json('verifyOTP route')
+  const { code } = req.query
+  if (parseInt(req.app.locals.OTP) === parseInt(code)) {
+    req.app.locals.OTP = null //reset the otp value
+    req.app.locals.resetSession = true //start session for reset passw
+    return res.status(201).send({ mssg: 'Verify  Successfully' })
+  }
+  return res.status(400).send({ error: 'Invalid OTP' })
 }
 
 /** GET */
@@ -157,7 +217,12 @@ exports.verifyOTP = (req, res) => {
  */
 // successfully redirect user when OTP is valid
 exports.createResetSession = (req, res) => {
-  res.json('createResetSession route')
+  if (req.app.locals.resetPassword) {
+    req.app.locals.resetSession = false
+    //accordé
+    return res.status(201).send({ mssg: 'acces granted' })
+  }
+  return res.status(440).send({ error: 'sessions expired' })
 }
 
 /** PUT */
@@ -171,8 +236,28 @@ exports.createResetSession = (req, res) => {
       address:'',
       profile:''
   }*/
-exports.updtateUser = (req, res) => {
-  res.json('updateUser route')
+exports.updateUser = async (req, res) => {
+  try {
+    // const id = req.query.id
+    const { userId } = req.user
+
+    //if(id)
+    if (userId) {
+      const body = req.body
+
+      // update the data
+      //{_id : id}
+      UserModel.updateOne({ _id: userId }, body, function (err, data) {
+        if (err) throw err
+
+        return res.status(201).send({ msg: 'Record Updated...!' })
+      })
+    } else {
+      return res.status(401).send({ error: 'User Not Found...!' })
+    }
+  } catch (error) {
+    return res.status(401).send({ error })
+  }
 }
 /** PUT */
 /**
@@ -180,5 +265,38 @@ exports.updtateUser = (req, res) => {
  */
 // update the password when we have valid session
 exports.resetPassword = (req, res) => {
-  res.json('resetPassword route')
+  try {
+    if (!req.app.locals.resetSession)
+      return res.status(440).send({ error: 'session expired' })
+
+    const { username, password } = req.body
+    try {
+      UserModel.findOne({ username })
+        .then((user) => {
+          bcrypt
+            .hash(password, 10)
+            .then((hashedPassword) => {
+              UserModel.updateOne(
+                { username: user.username },
+                { password: hashedPassword },
+                function (err, data) {
+                  if (err) throw err
+                  req.app.locals.resetSession = false
+                  return res.status(201).send({ mssg: 'Record updated' })
+                }
+              )
+            })
+            .catch((error) => {
+              return res.status(500).send({ error: 'Enabled to hashed passw' })
+            })
+        })
+        .catch((error) => {
+          return res.status(404).send({ error: 'Username not found' })
+        })
+    } catch (error) {
+      return res.status(500).send({ error })
+    }
+  } catch (error) {
+    return res.status(401).send({ error })
+  }
 }
