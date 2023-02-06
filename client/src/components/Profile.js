@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
 import avatar from '../assets/avatar.jpeg'
 import toast, { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
