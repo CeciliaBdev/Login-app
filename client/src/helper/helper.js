@@ -1,7 +1,8 @@
 import axios from 'axios'
 import jwt_decode from 'jwt-decode'
 
-axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN
+// axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN
+axios.defaults.baseURL = 'http://localhost:8080'
 
 /** Make API Requests */
 
@@ -10,6 +11,7 @@ export async function getUsername() {
   const token = localStorage.getItem('token')
   if (!token) return Promise.reject('Cannot find Token')
   let decode = jwt_decode(token)
+  // console.log(decode)
   return decode
 }
 
@@ -62,6 +64,7 @@ export async function verifyPassword({ username, password }) {
   try {
     if (username) {
       const { data } = await axios.post('/api/login', { username, password })
+      console.log('data', data)
       return Promise.resolve({ data })
     }
   } catch (error) {

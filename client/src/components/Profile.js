@@ -1,29 +1,44 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import avatar from '../assets/avatar.jpeg'
-import { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
 import styles from '../styles/Username.module.css'
 import extend from '../styles/Profile.module.css'
 import { profileValidate } from '../helper/validate'
 import convertToBase64 from '../helper/convert'
+import useFetch from '../hooks/fetch.hook'
+import { updateUser } from '../helper/helper'
+import { useNavigate } from 'react-router'
 
 function Profile() {
   const [file, setFile] = useState()
+  const navigate = useNavigate()
+  const [{ isLoading, apiData, serverError }] = useFetch()
+
   const formik = useFormik({
     initialValues: {
-      firstname: '',
-      lastname: '',
-      mobile: '',
-      email: 'test@gmail.com',
-      address: '',
+      firstName: apiData?.firstName || '',
+      lastName: apiData?.lastName || '',
+      mobile: apiData?.mobile || '',
+      email: apiData?.email || '',
+      address: apiData?.address || '',
     },
+    enableReinitialize: true,
     validate: profileValidate,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async (values) => {
       //on rajoute dans l'objet values la key value profile:file
-      values = await Object.assign(values, { profile: file || '' })
+      values = await Object.assign(values, {
+        profile: file || apiData?.profile || '',
+      })
+      let updatePromise = updateUser(values)
+      toast.promise(updatePromise, {
+        loading: 'Updating...',
+        success: <b>Update Successfully...!</b>,
+        error: <b>Could not update!</b>,
+      })
       console.log(values)
     },
   })
@@ -32,6 +47,16 @@ function Profile() {
     const base64 = await convertToBase64(e.target.files[0])
     setFile(base64)
   }
+
+  //logout
+  function userLogout() {
+    localStorage.removeItem('token')
+    navigate('/')
+  }
+
+  if (isLoading) return <h1 className="text-2-xl font-bold">isLoading</h1>
+  if (serverError)
+    return <h1 className="text-xl text-red-500">{serverError.message}</h1>
 
   return (
     <div className="container mx-auto">
@@ -53,7 +78,7 @@ function Profile() {
             <div className="profile flex justify-center py-4">
               <label htmlFor="profile">
                 <img
-                  src={file || avatar}
+                  src={apiData?.profile || avatar}
                   className={styles.profile_img}
                   alt="avatar"
                 />
@@ -71,13 +96,13 @@ function Profile() {
                   type="text"
                   placeholder="Firstname"
                   className={styles.textbox}
-                  {...formik.getFieldProps('firstname')}
+                  {...formik.getFieldProps('firstName')}
                 />
                 <input
                   type="text"
                   placeholder="Lastname"
                   className={styles.textbox}
-                  {...formik.getFieldProps('lastname')}
+                  {...formik.getFieldProps('lastName')}
                 />
               </div>
 
@@ -103,15 +128,15 @@ function Profile() {
                 {...formik.getFieldProps('address')}
               />
               <button type="submit" className={styles.btn}>
-                Register
+                Update
               </button>
             </div>
             <div className="text-center py-4">
               <span className="text-gray-500">
-                Come back later?
-                <Link className="text-red-500" to="/">
+                come back later?{' '}
+                <button onClick={userLogout} className="text-red-500" to="/">
                   Logout
-                </Link>
+                </button>
               </span>
             </div>
           </form>
