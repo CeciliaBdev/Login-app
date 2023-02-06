@@ -15,6 +15,7 @@ async function verifyUser(req, res, next) {
     // check the user existance
     let exist = await UserModel.findOne({ username })
     if (!exist) return res.status(404).send({ error: "Can't find User!" })
+    // if (exist) return res.status(200).send({ msg: 'Auth ok' })
     next()
   } catch (error) {
     return res.status(404).send({ error: 'Authentication Error' })
@@ -109,7 +110,7 @@ exports.login = (req, res) => {
         bcrypt
           .compare(password, user.password)
           .then((passwordCheck) => {
-            if (!passwordCheck)
+            if (passwordCheck)
               return res.status(400).send({ error: "Don't have Password" })
 
             // create jwt token

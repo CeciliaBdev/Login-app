@@ -11,7 +11,7 @@ const { registerMail } = require('../controllers/mailer')
 
 router.route('/register').post(UserCtrl.register) //register user
 router.route('/registerMail').post(registerMail) //send the email
-router.route('/authenticate').post((req, res) => res.end()) //authenticate user
+router.route('/authenticate').post(UserCtrl.verifyUser, (req, res) => res.end()) //authenticate user
 //ici 2 fcts : verifyUser et login
 router.route('/login').post(UserCtrl.verifyUser, UserCtrl.login) //login in app
 
