@@ -130,15 +130,15 @@ function Profile() {
                 Update
               </button>
             </div>
-            <div className="text-center py-4">
-              <span className="text-gray-500">
-                come back later?{' '}
-                <button onClick={userLogout} className="text-red-500" to="/">
-                  Logout
-                </button>
-              </span>
-            </div>
           </form>
+          <div className="text-center py-4">
+            <span className="text-gray-500">
+              come back later?{' '}
+              <button onClick={userLogout} className="text-red-500" to="/">
+                Logout
+              </button>
+            </span>
+          </div>
         </div>
       </div>
     </div>
