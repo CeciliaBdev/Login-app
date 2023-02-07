@@ -6,10 +6,10 @@ const ENV = require('../config.js')
 let nodeConfig = {
   host: 'smtp.ethereal.email',
   port: 587,
-  secure: false, // true for 465, false for other ports
+  // secure: false, // true for 465, false for other ports
   auth: {
-    user: ENV.EMAIL, // generated ethereal user
-    pass: ENV.PASSWORD, // generated ethereal password
+    user: 'derrick.reynolds99@ethereal.email',
+    pass: 'tPhq56yCSXfhawhrJA',
   },
 }
 
@@ -68,5 +68,5 @@ async function registerMail(req, res) {
     })
     .catch((error) => res.status(500).send({ error: 'erreur !' }))
 
-  console.log('Message sent: %s', info.messageId)
+  // console.log('Message sent: %s', message)
 }
