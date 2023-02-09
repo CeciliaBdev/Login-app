@@ -110,7 +110,7 @@ exports.login = (req, res) => {
         bcrypt
           .compare(password, user.password)
           .then((passwordCheck) => {
-            if (passwordCheck)
+            if (!passwordCheck)
               return res.status(400).send({ error: "Don't have Password" })
 
             // create jwt token
@@ -218,10 +218,10 @@ exports.verifyOTP = (req, res) => {
  */
 // successfully redirect user when OTP is valid
 exports.createResetSession = (req, res) => {
-  if (req.app.locals.resetPassword) {
-    req.app.locals.resetSession = false
+  if (req.app.locals.resetSession) {
+    // req.app.locals.resetSession = false
     //accordé
-    return res.status(201).send({ mssg: 'acces granted' })
+    return res.status(201).send({ flag: req.app.locals.resetSession })
   }
   return res.status(440).send({ error: 'sessions expired' })
 }
@@ -283,7 +283,7 @@ exports.resetPassword = (req, res) => {
                 function (err, data) {
                   if (err) throw err
                   req.app.locals.resetSession = false
-                  return res.status(201).send({ mssg: 'Record updated' })
+                  return res.status(201).send({ msg: 'Record updated' })
                 }
               )
             })

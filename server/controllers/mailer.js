@@ -8,8 +8,8 @@ let nodeConfig = {
   port: 587,
   // secure: false, // true for 465, false for other ports
   auth: {
-    user: 'derrick.reynolds99@ethereal.email',
-    pass: 'tPhq56yCSXfhawhrJA',
+    user: 'johan.zulauf30@ethereal.email',
+    pass: 'RTdErQyvkBGJXS1Zba',
   },
 }
 
