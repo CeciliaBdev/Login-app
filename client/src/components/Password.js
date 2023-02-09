@@ -76,13 +76,11 @@ function Password() {
                 Sign In
               </button>
             </div>
-            <div className="text-center py-4">
-              <span className="text-gray-500">
-                Forgot password ?
-                <Link className="text-red-500" to="/recovery">
-                  Recover Now
-                </Link>
-              </span>
+            <div className="text-center py-4 flex flex-row justify-around">
+              <span className="text-gray-500">Forgot password ? </span>
+              <Link className="text-red-500" to="/recovery">
+                Recover Now
+              </Link>
             </div>
           </form>
         </div>

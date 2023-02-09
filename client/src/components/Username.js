@@ -29,7 +29,7 @@ function Username() {
     <div className="container mx-auto">
       <Toaster position="top-center" reverseOrder={false}></Toaster>
 
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex  flex-col justify-center items-center h-screen gap-5">
         <div className={styles.glass}>
           <div className="title flex flex-col items-center">
             <h4 className="text-5xl font-bold">Hello</h4>
@@ -53,17 +53,20 @@ function Username() {
                 Let's go
               </button>
             </div>
-            <div className="text-center py-4">
-              <span className="text-gray-500">
-                Not a member
-                <Link className="text-red-500" to="/register">
-                  {' '}
-                  Register Now
-                </Link>
-              </span>
+            <div className="text-center py-4 flex flex-row justify-around">
+              <span className="text-gray-500">Not a member ?</span>
+              <Link className="text-red-500" to="/register">
+                {' '}
+                Register Now
+              </Link>
             </div>
           </form>
         </div>
+        <span className="flex flex-col items-center">
+          For test the app, try these identifiers:
+          <p>Username: example1234</p>
+          <p>password: admin@1234</p>
+        </span>
       </div>
     </div>
   )
