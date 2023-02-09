@@ -16,13 +16,14 @@ function Password() {
 
   const formik = useFormik({
     initialValues: {
-      password: 'admin@123',
+      password: '',
     },
     validate: passwordValidate,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async (values) => {
       let loginPromise = verifyPassword({ username, password: values.password })
+      console.log(values.password)
       toast.promise(loginPromise, {
         loading: 'Checking...',
         success: <b>Login Successfully...!</b>,
